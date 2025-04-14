@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <svg width="5056" height="5604"></svg>
+    <!--<div class="states"></div>-->
+  </body>
+  <style>
+    body {
+      display: flex;
+      overflow: hidden;
+    }
+    body > .states {
+      overflow-y: auto;
+      width: 300px;
+      height: 100%;
+    }
+    body > .states > .state {
+      display: flex;
+      width: 100%;
+      aspect-ratio: 1/1;
+      cursor: pointer;
+    }
+    body > .states > .state:hover {
+      opacity: 0.6;
+    }
+    body > .states > .state > img {
+      max-width: 80%;
+      aspect-ratio: auto;
+      margin: auto;
+    }
+    svg {
+      flex: 1;
+    }
+    svg > path {
+      cursor: grab;
+      scale: 0.1;
+      transform: origin 0;
+    }
+  </style>
+  <script>
+    const states = [
+      "andhra",
+      "delhi",
+      "arunanchal",
+      "assam",
+      "bihar",
+      "chattishgarh",
+      "goa",
+      "gujarat",
+      "haryana",
+      "himachal",
+      "jammu",
+      "jharkhand",
+      "karnataka",
+      "kerala",
+      "ladakh",
+      "madhya",
+      "maharastra",
+      "manipur",
+      "meghalaya",
+      "mizoram",
+      "nagaland",
+      "odisha",
+      "punjab",
+      "rajasthan",
+      "sikkim",
+      "tamil",
+      "telagana",
+      "tripura",
+      "uttarakhand",
+      "uttarpradesh",
+      "westbengal",
+    ];
+    const svg = document.querySelector("svg");
+    async function renderPaths() {
+      var paths = "";
+      svg.style.display = "none";
+      for await (const state of states) {
+        const rawRes = await fetch(`/svgstates/${state}.svg`);
+        paths += await rawRes.text();
+      }
+
+      const margin = 100; // To avoid placing elements right at the edges
+      svg.innerHTML = paths;
+      [...svg.children].forEach((element) => {
+        const randX = Math.random() * 800;
+        const randY = Math.random() * 500;
+
+        element.setAttribute("transform", `translate(${randX}, ${randY})`);
+        makeDraggable(element);
+      });
+      svg.style.display = "block";
+    }
+
+    async function renderStates() {
+      const states = document.querySelector(".states");
+      for (let i = 0; i < 31; i++) {
+        const div = document.createElement("div");
+        div.classList.add("state");
+        div.innerHTML = `<img src="/states/Group ${i + 1}.png"></img>`;
+        states.appendChild(div);
+      }
+    }
+
+    // renderStates();
+
+    function makeDraggable(pathElement, scale = 0.2) {
+      let isDragging = false;
+      let startX, startY;
+      let currentTransform = { x: 0, y: 0 };
+
+      function getCurrentTransform() {
+        const transform = pathElement.getAttribute("transform");
+        if (transform) {
+          const match = transform.match(
+            /translate\(\s*([-\d.]+)\s*,\s*([-\d.]+)\s*\)/
+          );
+          if (match) {
+            return {
+              x: parseFloat(match[1]),
+              y: parseFloat(match[2]),
+            };
+          }
+        }
+        return { x: 0, y: 0 };
+      }
+
+      function startDrag(x, y) {
+        isDragging = true;
+        startX = x;
+        startY = y;
+        currentTransform = getCurrentTransform();
+      }
+
+      function dragMove(x, y) {
+        if (!isDragging) return;
+        const dx = (x - startX) / scale;
+        const dy = (y - startY) / scale;
+
+        pathElement.setAttribute(
+          "transform",
+          `translate(${currentTransform.x + dx}, ${currentTransform.y + dy})`
+        );
+      }
+
+      function endDrag() {
+        isDragging = false;
+      }
+
+      // Mouse events
+      pathElement.addEventListener("mousedown", (e) => {
+        startDrag(e.clientX, e.clientY);
+        e.preventDefault();
+      });
+
+      document.addEventListener("mousemove", (e) => {
+        dragMove(e.clientX, e.clientY);
+      });
+
+      document.addEventListener("mouseup", () => {
+        endDrag();
+      });
+
+      // Touch events
+      pathElement.addEventListener("touchstart", (e) => {
+        const touch = e.touches[0];
+        startDrag(touch.clientX, touch.clientY);
+        e.preventDefault();
+      });
+
+      document.addEventListener("touchmove", (e) => {
+        const touch = e.touches[0];
+        dragMove(touch.clientX, touch.clientY);
+      });
+
+      document.addEventListener("touchend", () => {
+        endDrag();
+      });
+    }
+
+    renderPaths();
+  </script>
+</html>
