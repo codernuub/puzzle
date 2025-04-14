@@ -76,7 +76,7 @@
       var paths = "";
       svg.style.display = "none";
       for await (const state of states) {
-        const rawRes = await fetch(`/svgstates/${state}.svg`);
+        const rawRes = await fetch(`svgstates/${state}.svg`);
         paths += await rawRes.text();
       }
 
