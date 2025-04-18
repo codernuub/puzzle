@@ -53,13 +53,19 @@
     }
 
     footer > button:nth-child(2) {
+      border: 2px solid royalblue;
+      color: white;
+      background-color: royalblue;
+    }
+
+    footer > button:nth-child(3) {
       /*border: 2px solid green;
   color: green;
   background-color: transparent;*/
       background-color: #4caf50;
     }
 
-    footer > button:nth-child(3) {
+    footer > button:nth-child(4) {
       /*border: 2px solid orangered;
   color: orangered;
   background-color: transparent;*/
@@ -117,14 +123,15 @@
   <body>
     <footer class="buttons">
       <button onclick="check()">Check</button>
+      <button onclick="saveMap()">Save</button>
       <button onclick="autoFill()">Auto place</button>
-      <button onclick="restart()">Restart</button>
+      <button onclick="reset()">Reset</button>
     </footer>
     <svg width="5056" height="5604"></svg>
     <div class="alert-box" id="alertBox">
       <div class="alert-content">
         <h1 class="alert-message" id="alertMessage">Well Done!</h1>
-        <button class="alert-button" id="alertButton">Close</button>
+        <button class="alert-button" id="alertButton">Ok</button>
       </div>
     </div>
   </body>
@@ -176,10 +183,13 @@
       svg.innerHTML = paths;
       const width = window.innerWidth;
       const height = window.innerHeight;
-      console.log(width, height);
+
+      const savedCoords = window.localStorage.getItem("map:coords");
+      const { coords } = savedCoords ? JSON.parse(savedCoords) : { coords: [] };
+
       [...svg.children].forEach((element, i) => {
-        const randX = Math.random() * width; //* (maxX - minX) + minX;
-        const randY = Math.random() * height; //* (maxY - minY) + minY;
+        const randX = coords[i]?.x || Math.random() * width; //* (maxX - minX) + minX;
+        const randY = coords[i]?.y || Math.random() * height; //* (maxY - minY) + minY;
         element.setAttribute("id", states[i]);
         element.setAttribute("transform", `translate(${randX}, ${randY})`);
         makeDraggable(element);
@@ -372,8 +382,34 @@
       showAlert(isSuccess);
     }
 
+    function saveMap() {
+      const coords = [...svg.children].map((element) => {
+        const coord = { x: 0, y: 0 };
+        const transform = element.getAttribute("transform");
+        if (transform) {
+          const match = transform.match(
+            /translate\(\s*([-\d.]+)\s*,\s*([-\d.]+)\s*\)/
+          );
+          if (match) {
+            return {
+              x: parseFloat(match[1]),
+              y: parseFloat(match[2]),
+            };
+          }
+        }
+        return coord;
+      });
+      window.localStorage.setItem("map:coords", JSON.stringify({ coords }));
+      alert("Saved successfully");
+    }
+
     function restart() {
       window.location.reload();
+    }
+
+    function reset() {
+      window.localStorage.removeItem("map:coords");
+      restart();
     }
 
     alertButton.addEventListener("click", () => {
