@@ -181,15 +181,15 @@
       }
 
       svg.innerHTML = paths;
-      const width = window.innerWidth;
-      const height = window.innerHeight;
 
       const savedCoords = window.localStorage.getItem("map:coords");
-      const { coords } = savedCoords ? JSON.parse(savedCoords) : { coords: [] };
+      const { coords } = savedCoords
+        ? JSON.parse(savedCoords)
+        : { coords: defaultCoords };
 
       [...svg.children].forEach((element, i) => {
-        const randX = coords[i]?.x || Math.random() * width; //* (maxX - minX) + minX;
-        const randY = coords[i]?.y || Math.random() * height; //* (maxY - minY) + minY;
+        const randX = coords[i].x;
+        const randY = coords[i].y;
         element.setAttribute("id", states[i]);
         element.setAttribute("transform", `translate(${randX}, ${randY})`);
         makeDraggable(element);
