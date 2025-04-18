@@ -1,0 +1,31 @@
+<html>
+  <script src="./orders/order1.js"></script>
+  <script src="./orders/order2.js"></script>
+  <script>
+    function compareStateArrays(array1, array2) {
+      const length = Math.max(array1.length, array2.length);
+      let correctCount = 0, incorrectCount = 0;
+
+      for (let i = 0; i < length; i++) {
+        const o1 = array1[i] || {};
+        const o2 = array2[i] || {};
+
+        const state1 = o1.state || null;
+        const state2 = o2.state || null;
+        const matched = state1 === state2;
+
+        if (matched) {
+          correctCount++;
+        } else {
+          incorrectCount++;
+        }
+
+        console.log(`O1 ${state1}, O2 ${state2}, matched: ${matched}`);
+      }
+
+      console.log(`Result Correct:${correctCount}/${length} Incorrect:${incorrectCount}/${length}`);
+    }
+
+    compareStateArrays(order1, order2);
+  </script>
+</html>
