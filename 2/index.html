@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Map Activity</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="/js/dragDropTouch.js"></script>
+  </head>
+  <link href="css/index.css" rel="stylesheet" />
+  <body class="layout">
+    <div class="bg"></div>
+    <div id="svg-container"></div>
+    <div class="toolbar">
+      <img class="logo" src="/assets/logo.png" />
+      <br />
+      <!--states-->
+      <div class="choose-states">
+        <div class="states"></div>
+      </div>
+      <!--buttons-->
+      <div class="buttons">
+        <button onclick="saveMap()">Save</button>
+        <button onclick="check()">Check</button>
+        <button onclick="reset()">Reset</button>
+      </div>
+    </div>
+
+    <!--Alert box-->
+    <div class="alert-box" id="alertBox">
+      <div class="alert-content">
+        <h1 class="alert-message" id="alertMessage">Well Done!</h1>
+        <button class="alert-button" id="alertButton">Ok</button>
+      </div>
+    </div>
+  </body>
+  <script src="js/data/states.js"></script>
+  <script src="js/data/order.js"></script>
+  <script src="js/movement.js"></script>
+  <script src="js/index.js"></script>
+</html>

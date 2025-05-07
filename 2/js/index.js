@@ -34,7 +34,7 @@ function renderSavedPieces() {
 function renderStateList() {
   const states = stateNames.map((stateName) => {
     return `<div class='state' id="${stateName}">
-         <img src="/images/states/${stateName}.png" draggable="true" id="${stateName}"  alt="${stateName}"/>
+         <img src="images/states/${stateName}.png" draggable="true" id="${stateName}"  alt="${stateName}"/>
         
          <span>${stateName.split("-").join(" ")}</span>
     </div>`;
@@ -55,7 +55,7 @@ renderSavedPieces();
 //MAP CHECKER FUNCTIONS
 
 function showAlert(isSuccess) {
-  const audioSrc = isSuccess ? "audio/welldone.mp3" : "audio/tryAgain.mp3";
+  const audioSrc = isSuccess ? "/audio/welldone.mp3" : "/audio/tryAgain.mp3";
   var audio = new Audio(audioSrc);
   alertMessage.textContent = isSuccess ? "Well Done!" : "Try Again!";
   alertMessage.style.color = isSuccess ? "green" : "#F44336"; // Green for success, red for try again
@@ -120,7 +120,7 @@ function isCorrectlyArranged(array1, array2) {
       incorrects.push([state1, state2]);
     }
   }
-  
+
   if (incorrects.length === 2) {
     console.log("Fixing Exception case");
     const [arr1, arr2] = incorrects;
