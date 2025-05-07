@@ -62,7 +62,7 @@ function generateAndRenderStates() {
 }
 // Function to show the alert
 function showAlert(isSuccess) {
-  const audioSrc = isSuccess ? "../../audio/welldone.mp3" : "../../audio/tryAgain.mp3";
+  const audioSrc = isSuccess ? "../audio/welldone.mp3" : "../audio/tryAgain.mp3";
   var audio = new Audio(audioSrc);
   alertMessage.textContent = isSuccess ? "Well Done!" : "Try Again!";
   alertMessage.style.color = isSuccess ? "green" : "#F44336"; // Green for success, red for try again
