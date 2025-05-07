@@ -6,12 +6,12 @@ const centerOrder = [
   },
   {
     order: 2,
-    state: "jammu",
+    state: "jammu-and-kashmir",
     distance: 30.141102599392262,
   },
   {
     order: 3,
-    state: "himachal",
+    state: "himachal-pradesh",
     distance: 61.27060266943665,
   },
   {
@@ -41,12 +41,12 @@ const centerOrder = [
   },
   {
     order: 9,
-    state: "uttarpradesh",
+    state: "uttar-pradesh",
     distance: 168.9660264106639,
   },
   {
     order: 10,
-    state: "madhya",
+    state: "madhya-pradesh",
     distance: 216.89130426008646,
   },
   {
@@ -71,17 +71,17 @@ const centerOrder = [
   },
   {
     order: 15,
-    state: "westbengal",
+    state: "west-bengal",
     distance: 283.2197840955782,
   },
   {
     order: 16,
-    state: "chattishgarh",
+    state: "chhattisgarh",
     distance: 291.7989229908903,
   },
   {
     order: 17,
-    state: "maharastra",
+    state: "maharashtra",
     distance: 313.014747062456,
   },
   {
@@ -101,12 +101,12 @@ const centerOrder = [
   },
   {
     order: 21,
-    state: "arunanchal",
+    state: "arunachal-pradesh",
     distance: 335.8338562628873,
   },
   {
     order: 22,
-    state: "telagana",
+    state: "telangana",
     distance: 336.04823236565124,
   },
   {
@@ -131,7 +131,7 @@ const centerOrder = [
   },
   {
     order: 27,
-    state: "andhra",
+    state: "andhra-pradesh",
     distance: 376.8159560919396,
   },
   {
@@ -146,7 +146,7 @@ const centerOrder = [
   },
   {
     order: 30,
-    state: "tamil",
+    state: "tamil-nadu",
     distance: 464.8274332037193,
   },
   {
