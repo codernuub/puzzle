@@ -11,6 +11,7 @@ function renderPiece(stateName, { width, height, order }, { x, y }) {
   if (stateImg) {
     const img = document.createElement("img");
     img.src = stateImg.getAttribute("src");
+    img.classList.add('state');
     img.setAttribute("id", stateName);
     img.width = width;
     img.height = height;
@@ -139,7 +140,8 @@ function check() {
 
 //BUTTON ACTIONS
 function saveMap() {
-  const coords = [...svgContainer.children].reduce((acc, element) => {
+  const coords = [...svgContainer.children].reduce((acc, element, index) => {
+    if(index === 0) return {}
     const coord = getCurrentCoordinates(element);
     acc[element.id] = coord; // Use element's id as the key
     return acc;
