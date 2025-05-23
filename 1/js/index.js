@@ -4,15 +4,34 @@ const alertBox = document.getElementById("alertBox");
 const alertMessage = document.getElementById("alertMessage");
 const alertButton = document.getElementById("alertButton");
 const mapContainer = document.querySelector(".map");
+const instructionEl = document.querySelector(".instruction");
 const svgElement = mapContainer.children[0];
 
 const data = {
   randomStates: [],
+  dragged: [],
   scale: 1,
   minScale: 1,
   maxScale: 2,
   scaleStep: 0.2,
+  passed: false,
 };
+
+function setupInstructionModal() {
+  instructionEl.children[0].children[1].innerHTML = ACTIVITY.instruction;
+  instructionEl.classList.add("slide-left");
+}
+
+function toggleInstructionModal() {
+  console.log("Clicked");
+  if (instructionEl.classList.contains("slide-left")) {
+    instructionEl.classList.add("slide-right");
+    instructionEl.classList.remove("slide-left");
+  } else {
+    instructionEl.classList.add("slide-left");
+    instructionEl.classList.remove("slide-right");
+  }
+}
 
 function updateZoomPercentage() {
   mapContainer.children[1].children[1].textContent = `${Math.round(
@@ -39,7 +58,9 @@ function zoomOut() {
 
 // Function to get 10 random states
 function getRandomStates(states, count = 10) {
-  const shuffled = [...states.filter(state => !state.disabled)].sort(() => 0.5 - Math.random());
+  const shuffled = [...states.filter((state) => !state.disabled)].sort(
+    () => 0.5 - Math.random()
+  );
   return shuffled.slice(0, count);
 }
 
@@ -47,7 +68,9 @@ function getRandomStates(states, count = 10) {
 function generateAndRenderStates() {
   const statesContainer = document.querySelector(".states");
   statesContainer.innerHTML = ""; // Clear existing states
-  data.randomStates = getRandomStates(statesData);
+  data.randomStates = ACTIVITY.states.length
+    ? ACTIVITY.states
+    : getRandomStates(statesData, ACTIVITY.randomStatesCount);
   data.randomStates.forEach((state) => {
     const div = document.createElement("div");
     div.className = "state";
@@ -62,7 +85,7 @@ function generateAndRenderStates() {
 }
 // Function to show the alert
 function showAlert(isSuccess) {
-  const audioSrc = isSuccess ? "../audio/welldone.mp3" : "../audio/tryAgain.mp3";
+  const audioSrc = isSuccess ? "audio/welldone.mp3" : "audio/tryAgain.mp3";
   var audio = new Audio(audioSrc);
   alertMessage.textContent = isSuccess ? "Well Done!" : "Try Again!";
   alertMessage.style.color = isSuccess ? "green" : "#F44336"; // Green for success, red for try again
@@ -70,19 +93,34 @@ function showAlert(isSuccess) {
   audio.play();
 }
 
-function reset() {
-  window.location.reload();
+function undo() {
+  //window.location.reload();
+  const lastDrop = data.dragged.pop();
+  if (!lastDrop) return;
+  const zone = document.querySelector(`path[data-state="${lastDrop.place}"]`);
+  //Change zone bg color
+  zone.style.stroke = "#ffffff";
+  zone.style.fill = "#c3cf6b";
+  zone.removeAttribute("user-ans");
+  //Show cirle
+  updateMapCircle(lastDrop.place, true);
+  //Remove text
+  const textDiv = document.querySelector(
+    `.drop-zone-text[original-state="${lastDrop.place}"]`
+  );
+  if (textDiv) textDiv.remove();
+  updateDragElement(lastDrop.piece, true);
 }
 
-function restart() {
+function tryAgain() {
   dropZones.forEach((zone) => {
     zone.classList.remove("correct");
     zone.classList.remove("incorrect");
     const answeredState = zone.getAttribute("user-ans");
     if (!answeredState) return;
     const originalState = zone.getAttribute("data-state");
-    zone.style.fill = "#ffffff";
-    zone.style.stroke = "#0f0f0f";
+    zone.style.fill = "#c3cf6b";
+    zone.style.stroke = "#ffffff";
     zone.removeAttribute("user-ans", "");
     //Remove text div
     const textDiv = document.querySelector(
@@ -94,6 +132,10 @@ function restart() {
     //Display source
     updateDragElement(answeredState, true);
   });
+}
+
+function restart() {
+  window.location.reload();
 }
 
 function check() {
@@ -112,9 +154,8 @@ function check() {
     }
   });
 
-  const isSuccess =
-    correct && correct === data.randomStates.length ? true : false;
-  showAlert(isSuccess);
+  data.passed = correct && correct === data.randomStates.length ? true : false;
+  showAlert(data.passed);
 }
 
 function updatePositionOfAllDroppedTexts() {
@@ -132,16 +173,13 @@ function updatePositionOfAllDroppedTexts() {
   });
 }
 
-// Call the function to render
-generateAndRenderStates();
-
 function updateMapCircle(stateName, show) {
   //Update circle drop zone style
   const circleElement = document.querySelector(
     `circle[data-state="${stateName}"]`
   );
   circleElement.style.fill = "none";
-  circleElement.style.stroke = show ? "goldenrod" : "none";
+  circleElement.style.stroke = show ? "grey" : "none";
   return circleElement;
 }
 
@@ -173,22 +211,10 @@ dropZones.forEach((zone) => {
     const originalState = zone.getAttribute("data-state");
     //Hide dragged element from source container
     updateDragElement(droppedState, false);
-    //Update drop zone style
-    if (originalState === "Puducherry") {
-      //zone will circle, need to access map area
-      const pathElement = document.querySelector(
-        `path[data-state="${originalState}"]`
-      );
-      pathElement.style.fill = "#007bff";
-      pathElement.style.stroke = "#ffffff";
-      pathElement.setAttribute("user-ans", droppedState);
-      zone.setAttribute("user-ans", droppedState);
-    } else {
-      //Zone will map area
-      zone.style.fill = "#007bff";
-      zone.style.stroke = "#ffffff";
-      zone.setAttribute("user-ans", droppedState);
-    }
+    //Zone will map area
+    zone.style.fill = "#007bff";
+    zone.style.stroke = "#ffffff";
+    zone.setAttribute("user-ans", droppedState);
     //Update circle drop zone style
     const circleElement = updateMapCircle(originalState, false);
     //Create and show text element
@@ -202,11 +228,24 @@ dropZones.forEach((zone) => {
     dropText.style.left = `${xPosition - rect.width / 2}px`;
     dropText.innerText = droppedState;
     document.querySelector(".map").appendChild(dropText);
+
+    //Store pieces to revert
+    data.dragged.push({ place: originalState, piece: droppedState });
   });
 });
 
 mapContainer.addEventListener("scroll", updatePositionOfAllDroppedTexts);
 
 alertButton.addEventListener("click", () => {
-  window.location.reload();
+  if (data.passed) {
+    restart();
+  } else {
+    tryAgain();
+  }
+  alertBox.style.display = "none";
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  generateAndRenderStates();
+  toggleInstructionModal();
 });

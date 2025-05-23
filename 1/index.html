@@ -3,8 +3,8 @@
   <head>
     <title>Map Activity</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="../js/dragDropTouch.js"></script>
-    <link rel="stylesheet" href="css/index.css"/>
+    <script src="js/dragDropTouch.js"></script>
+    <link rel="stylesheet" href="css/index.css" />
   </head>
   <body>
     <div class="bg"></div>
@@ -318,14 +318,7 @@
                 cy="411"
                 id="INBR"
               ></circle>
-              <!--<circle
-              r="4"
-              class="drop-zone"
-              data-state="Chandigarh"
-              cx="334.9"
-              cy="255.1"
-              id="INCH"
-            ></circle>-->
+
               <circle
                 r="4"
                 data-state="Chhattisgarh"
@@ -333,14 +326,7 @@
                 cy="533.4"
                 id="INCT"
               ></circle>
-              <!--<circle
-              r="4"
-              class="drop-zone"
-              data-state="Dādra and Nagar Haveli and Damān and Diu"
-              cx="232.5"
-              cy="573.8"
-              id="INDH"
-            ></circle>-->
+
               <circle
                 r="4"
                 data-state="Delhi"
@@ -502,13 +488,6 @@
                 cy="490.8"
                 id="INWB"
               ></circle>
-              <!--<circle
-              r="4"
-              data-state="Lakshadweep"
-              cx="233"
-              cy="912.6"
-              id="INLD"
-            ></circle>-->
               <circle
                 r="4"
                 data-state="Jammu and Kashmir"
@@ -534,14 +513,27 @@
       </div>
       <!--Show states list-->
       <div class="toolbar">
-        <img class="logo" src="../assets/logo.png" />
-        <br/>
+        <img class="logo" src="images/logo.png" />
+        <br />
         <div class="states"></div>
         <footer class="buttons">
           <button onclick="check()">Check</button>
           <button onclick="restart()">Restart</button>
-          <button onclick="reset()">Reset</button>
+          <button onclick="undo()">Undo</button>
         </footer>
+        <!--Instruction Modal-->
+        <div class="instruction">
+          <div class="content">
+            <div>
+              <h2>ⓘ Instructions</h2>
+              <span onclick="toggleInstructionModal()">╳</span>
+            </div>
+            <div class="description">
+              Drag and place state map on correct place.
+            </div>
+            <div class="arrow"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -553,7 +545,8 @@
       </div>
     </div>
   </body>
-  <script defer src="js/data.js"></script>
-  <script defer src="js/script.js"></script>
+  <script defer src="js/data/states.js"></script>
+  <script defer src="js/data/activity.js"></script>
+  <script defer src="js/index.js"></script>
   <script defer src="js/mapdrag.js"></script>
 </html>

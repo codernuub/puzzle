@@ -1,4 +1,4 @@
-const STATES_INFO= {
+const STATES_INFO = {
   "andhra-pradesh": {
     width: 180.553466796875,
     height: 153.4915313720703,

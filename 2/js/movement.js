@@ -45,6 +45,7 @@ function makeDraggable(element) {
 
   // Mouse events
   element.addEventListener("mousedown", (e) => {
+    if(e?.target?.classList);
     startDrag(e.clientX, e.clientY);
     e.preventDefault();
   });

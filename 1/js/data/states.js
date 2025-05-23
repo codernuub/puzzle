@@ -1,9 +1,4 @@
 const statesData = [
-  {
-    name: "Andaman and Nicobar",
-    dataState: "Andaman and Nicobar",
-    disabled: true,
-  },
   { name: "Andhra Pradesh", dataState: "Andhra Pradesh" },
   { name: "Arunachal Pradesh", dataState: "Arunachal Pradesh" },
   { name: "Assam", dataState: "Assam" },
@@ -27,7 +22,6 @@ const statesData = [
   { name: "Nagaland", dataState: "Nagaland" },
   { name: "Orissa", dataState: "Orissa" },
   { name: "Punjab", dataState: "Punjab" },
-  { name: "Puducherry", dataState: "Puducherry", disabled: true },
   { name: "Rajasthan", dataState: "Rajasthan" },
   { name: "Sikkim", dataState: "Sikkim" },
   { name: "Telangana", dataState: "Telangana" },

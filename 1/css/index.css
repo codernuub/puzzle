@@ -10,7 +10,7 @@ body {
 }
 
 * {
-  font-family: monospace;
+  font-family: sans-serif;
 }
 
 .bg {
@@ -19,7 +19,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url("../../assets/background.avif");
+  background-image: url("../images/background.avif");
   background-size: cover;
   background-repeat: no-repeat;
   opacity: 0.2;
@@ -127,7 +127,8 @@ body {
 .states {
   flex: 1;
   display: flex;
-  justify-content: space-between;
+  gap: 10px;
+  justify-content: start;
   width: 100%;
   margin-bottom: 20px;
   overflow: auto;
@@ -150,7 +151,8 @@ body {
   border-left: none;
   border-right: none;
   text-align: center;
-  font-size: 1.1rem;
+  font-size: 1rem;
+  font-weight: bold;
   color: black;
 }
 
@@ -199,6 +201,82 @@ body {
 .buttons > button:nth-child(3) {
   background-color: #f44336;
 }
+
+.instruction {
+  position: absolute;
+  top: 20px;
+  left: -340px;
+  width: 300px;
+  box-shadow: 1px 1px 8px 2px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  background-color: #ffffff;
+  border: 1px solid wheat;
+  transform: translateX(100%);
+  opacity: 0;
+  z-index: -1;
+  font-family: sans-serif;
+}
+.instruction > .content {
+  position: relative;
+}
+.instruction > .content > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.instruction > .content h2 {
+  margin: 0;
+}
+.instruction > .content span {
+  margin: 0;
+  font-size: 1rem;
+  margin: auto 0;
+  cursor: pointer;
+}
+.instruction > .content .description {
+  margin-top: 20px;
+}
+.instruction > .content .arrow {
+  top: 5px;
+  right: -28.5px;
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  transform: rotate(45deg);
+  background-color: #ffffff;
+  border-right: 1px solid wheat;
+  border-top: 1px solid wheat;
+}
+
+@keyframes slideLeft {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.slide-left {
+  animation: slideLeft 0.5s ease-out 0.2s forwards;
+}
+
+.slide-right {
+  animation: slideRight 0.5s ease-in forwards;
+}
 /*TOOLBAR STYLES*/
 
 /*Alert box*/
@@ -223,8 +301,8 @@ body {
   margin: auto;
   padding: 40px 100px;
   border-radius: 10px;
-  background-color: rgba(255, 255, 255, 0.551);
-  backdrop-filter: blur(5px);
+  background-color: rgba(255, 255, 255, 0.126);
+  backdrop-filter: blur(1px);
 }
 
 .alert-message {
@@ -282,7 +360,7 @@ body {
     width: 160px;
     white-space: wrap;
     text-align: center;
-    font-size: 1.3rem;
+    font-size: 1rem;
     border: 1px solid grey;
     padding:10px 5px !important; 
     margin: 0;

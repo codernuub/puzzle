@@ -1,10 +1,12 @@
 html {
   width: 100%;
   height: 100%;
+  overflow: hidden;
 }
 * {
   font-family: sans-serif;
 }
+
 .layout {
   display: flex;
   width: 100%;
@@ -18,10 +20,10 @@ html {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url("../../assets/background.avif");
+  background-image: url("../images/background.avif");
   background-size: cover;
   background-repeat: no-repeat;
-  opacity: 0.2;
+  opacity: 0.1;
 }
 
 /*SVG STYLES*/
@@ -32,27 +34,70 @@ html {
   height: 100%;
   overflow: hidden;
 }
-#svg-container > .state {
+#svg-container > .drag-state {
   position: absolute;
-  aspect-ratio: auto;
-  object-fit: contain;
   cursor: pointer;
 }
-#svg-container > .state:hover {
+#svg-container > .drag-state > img {
+  position: relative;
+  aspect-ratio: auto;
+  object-fit: contain;
+}
+#svg-container > .drag-state > p {
+  position: absolute;
+  z-index: 10000;
+  text-transform: capitalize;
+}
+#svg-container > .drag-state:hover {
   opacity: 0.6;
 }
 
 #svg-container > .map-outline {
   position: relative;
-  width: 632px;
+  /*width: 632px;*/
+  width: 656px;
   margin: auto;
   z-index: -1;
+}
+
+.svg {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+svg {
+  flex-shrink: 0;
+  margin: auto;
+  transform-origin: top left;
+  transform: scale(0.13) translate(50%, 2.5%);
+}
+
+.checked {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.status-icon {
+  position: absolute;
+  width: 20px;
+  max-height: fit-content;
+  flex-shrink: 0;
+  aspect-ratio: auto;
+  border: 2px solid;
+  border-radius: 100%;
+}
+.cross {
+  border-color: red;
+}
+.tick {
+  border-color: green;
 }
 
 /*SVG STYLES*/
 
 /*TOOLBAR STYLES*/
 .toolbar {
+  position: relative;
   display: flex;
   flex-direction: column;
   padding: 20px;
@@ -63,6 +108,7 @@ html {
 .toolbar > .logo {
   height: fit-content;
   margin: auto;
+  cursor: pointer;
 }
 .choose-states {
   width: 160px;
@@ -155,16 +201,67 @@ html {
 }
 
 .buttons > button:nth-child(1) {
-  background-color: royalblue;
+  background-color: #4caf50;
 }
 
 .buttons > button:nth-child(2) {
-  background-color: #4caf50;
+  background-color: royalblue;
 }
 
 .buttons > button:nth-child(3) {
   background-color: #f44336;
 }
+
+.buttons > button:nth-child(4) {
+  background-color: goldenrod;
+}
+
+.instruction {
+  position: absolute;
+  top: 20px;
+  left: -340px;
+  width: 300px;
+  box-shadow: 1px 1px 8px 2px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  background-color: #ffffff;
+  border: 1px solid wheat;
+  transform: translateX(100%);
+  opacity: 0;
+  z-index: -1;
+  font-family: sans-serif;
+}
+.instruction > .content {
+  position: relative;
+}
+.instruction > .content > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.instruction > .content h2 {
+  margin: 0;
+}
+.instruction > .content span {
+  margin: 0;
+  font-size: 1rem;
+  margin: auto 0;
+  cursor: pointer;
+}
+.instruction > .content .description {
+  margin-top: 20px;
+}
+.instruction > .content .arrow {
+  top: 5px;
+  right: -28.5px;
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  transform: rotate(45deg);
+  background-color: #ffffff;
+  border-right: 1px solid wheat;
+  border-top: 1px solid wheat;
+}
+
 /*TOOLBAR STYLES*/
 
 /*Alert box*/
@@ -175,7 +272,7 @@ html {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.207);
   justify-content: center;
   align-items: center;
   z-index: 1000;
@@ -188,8 +285,9 @@ html {
   margin: auto;
   padding: 40px 100px;
   border-radius: 10px;
-  background-color: rgba(255, 255, 255, 0.551);
-  backdrop-filter: blur(5px);
+  background-color: rgba(255, 255, 255, 0);
+  box-shadow: 1px 1px 10px 8px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(1px);
 }
 
 .alert-message {
@@ -226,6 +324,9 @@ html {
   .layout > #svg-container > img {
     scale: 0.68;
     transform-origin: left;
+  }
+  svg {
+    transform: translate(0) scale(0.09);
   }
   .toolbar {
     width: 100%;
@@ -270,4 +371,34 @@ html {
 
 .states > .selected {
   display: none;
+}
+
+@keyframes slideLeft {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.slide-left {
+  animation: slideLeft 0.5s ease-out 0.2s forwards;
+}
+
+.slide-right {
+  animation: slideRight 0.5s ease-in forwards;
 }
