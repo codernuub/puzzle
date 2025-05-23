@@ -7,19 +7,22 @@
   </head>
   <body>
     <header>
-      <img src="assets/logo.png" />
+      <img src="images/logo.png" />
       <h2>Map Of India Activity</h2>
     </header>
-    <div class="activities">
-      <a href="1" class="activity">
-        <img src="assets/thumbnails/thumb1.png" alt="State Map" />
-        <span>State Map</span>
-      </a>
-
-      <a href="2" class="activity">
-        <img src="assets/thumbnails/thumb2.png" alt="Map Puzzle" />
-        <span>Map Puzzle</span>
-      </a>
-    </div>
+    <div class="activities"></div>
   </body>
+  <script src="js/data.js"></script>
+  <script>
+    const h2 = document.querySelector("h2");
+    const activities = document.querySelector(".activities");
+    h2.textContent = data.heading;
+    //Activities
+    activities.innerHTML = data.activities.map((activity) => {
+      return ` <a href="${activity.id}" class="activity">
+        <img src="images/thumbnails/${activity.thumbnail}" alt-"${activity.name}" />
+        <span>${activity.name}</span>
+      </a>`;
+    }).join("");
+  </script>
 </html>
