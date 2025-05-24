@@ -1,3 +1,37 @@
+const SUPPORTED_STATES = [
+  "andhra-pradesh",
+  "assam",
+  "arunachal-pradesh",
+  "bihar",
+  "chhattisgarh",
+  "delhi",
+  "goa",
+  "gujarat",
+  "haryana",
+  "himachal-pradesh",
+  "jammu-and-kashmir",
+  "jharkhand",
+  "karnataka",
+  "kerala",
+  "ladakh",
+  "madhya-pradesh",
+  "maharashtra",
+  "manipur",
+  "meghalaya",
+  "mizoram",
+  "nagaland",
+  "odisha",
+  "punjab",
+  "rajasthan",
+  "sikkim",
+  "tamil-nadu",
+  "telangana",
+  "tripura",
+  "uttar-pradesh",
+  "uttarakhand",
+  "west-bengal",
+];
+
 const ACTIVITY = {
   instructions: "Drag and place the states on correct place",
   states: [
@@ -32,6 +66,6 @@ const ACTIVITY = {
     "uttar-pradesh",
     "uttarakhand",
     "west-bengal",
-  ], //Correct states to drag & place on correct place
+  ],
   showStateName: true, //Enable/Disable state name on dragable piece
 };

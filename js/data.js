@@ -10,6 +10,6 @@ const data = {
       id: 2,
       thumbnail: "thumb2.png",
       name: "Map Puzzle",
-    }
+    },
   ],
 };
