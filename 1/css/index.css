@@ -37,14 +37,16 @@ body {
   position: relative;
   z-index: 10;
   flex: 1;
+  overflow: hidden;
 }
 .screen > .map {
-  width: 100%;
+  display: flex;
+  flex:1;
   margin: auto;
+  overflow: hidden;
 }
 .screen > .map > svg {
-  width: 100%;
-  height: fit-content;
+  margin: auto;
 }
 
 .screen > .map > svg path {

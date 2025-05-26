@@ -1,11 +1,9 @@
 const states = document.querySelectorAll(".state");
-const dropZones = document.querySelectorAll(".drop-zone");
 const alertBox = document.getElementById("alertBox");
 const alertMessage = document.getElementById("alertMessage");
 const alertButton = document.getElementById("alertButton");
 const mapContainer = document.querySelector(".map");
 const instructionEl = document.querySelector(".instruction");
-const svgElement = mapContainer.children[0];
 
 const data = {
   randomStates: [],
@@ -16,6 +14,21 @@ const data = {
   scaleStep: 0.2,
   passed: false,
 };
+
+async function renderMap() {
+  await fetch("images/map.svg")
+    .then((res) => res.text())
+    .then((res) => {
+      mapContainer.innerHTML = `${res} <div class="zooms">
+            <button onclick="zoomOut()"><span>-</span></button>
+            <span>0%</span>
+            <button onclick="zoomIn()"><span>+</span></button>
+          </div>`;
+    })
+    .catch((error) => {
+      alert("Error loading SVG:", error);
+    });
+}
 
 function setupInstructionModal() {
   instructionEl.children[0].children[1].innerHTML = ACTIVITY.instruction;
@@ -39,6 +52,7 @@ function updateZoomPercentage() {
   )}%`;
 }
 function zoomIn() {
+  const svgElement = mapContainer.children[0];
   if (data.scale < data.maxScale) {
     data.scale += data.scaleStep;
     svgElement.style.transform = `scale(${data.scale})`;
@@ -48,6 +62,7 @@ function zoomIn() {
 }
 
 function zoomOut() {
+  const svgElement = mapContainer.children[0];
   if (data.scale > data.minScale) {
     data.scale -= data.scaleStep;
     svgElement.style.transform = `scale(${data.scale})`;
@@ -58,27 +73,25 @@ function zoomOut() {
 
 // Function to get 10 random states
 function getRandomStates(states, count = 10) {
-  const shuffled = [...states.filter((state) => !state.disabled)].sort(
-    () => 0.5 - Math.random()
-  );
+  const shuffled = states.sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);
 }
 
 // Function to render states inside the states div
 function generateAndRenderStates() {
   const statesContainer = document.querySelector(".states");
-  statesContainer.innerHTML = ""; // Clear existing states
+  statesContainer.innerHTML = "";
   data.randomStates = ACTIVITY.states.length
     ? ACTIVITY.states
     : getRandomStates(statesData, ACTIVITY.randomStatesCount);
-  data.randomStates.forEach((state) => {
+  data.randomStates.forEach((stateName) => {
     const div = document.createElement("div");
     div.className = "state";
     div.setAttribute("draggable", "true");
-    div.setAttribute("data-state", state.dataState);
-    div.textContent = state.name;
+    div.setAttribute("data-state", stateName);
+    div.textContent = stateName;
     div.addEventListener("dragstart", (e) => {
-      e.dataTransfer.setData("text/plain", state.dataState);
+      e.dataTransfer.setData("text/plain", stateName);
     });
     statesContainer.appendChild(div);
   });
@@ -113,6 +126,7 @@ function undo() {
 }
 
 function tryAgain() {
+  const dropZones = document.querySelectorAll(".drop-zone");
   dropZones.forEach((zone) => {
     zone.classList.remove("correct");
     zone.classList.remove("incorrect");
@@ -141,10 +155,8 @@ function restart() {
 function check() {
   var correct = 0;
 
-  data.randomStates.forEach((state) => {
-    const zone = document.querySelector(
-      `path[data-state="${state.dataState}"]`
-    );
+  data.randomStates.forEach((stateName) => {
+    const zone = document.querySelector(`path[data-state="${stateName}"]`);
     if (!zone) return;
     if (zone.getAttribute("data-state") === zone.getAttribute("user-ans")) {
       correct += 1;
@@ -192,47 +204,64 @@ function updateDragElement(draggedState, show) {
   stateElement.style.opacity = show ? "1" : "0";
 }
 
-dropZones.forEach((zone) => {
-  zone.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    if (zone.getAttribute("user-ans")) return;
-    zone.style.stroke = "#007bff";
-  });
+function setupDropZones() {
+  const dropZones = document.querySelectorAll(".drop-zone");
+  dropZones.forEach((zone) => {
+    zone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      if (zone.getAttribute("user-ans")) return;
+      zone.style.stroke = "#007bff";
+    });
 
-  zone.addEventListener("dragleave", () => {
-    if (zone.getAttribute("user-ans")) return;
-    zone.style.stroke = "#ffffff";
-  });
+    zone.addEventListener("dragleave", () => {
+      if (zone.getAttribute("user-ans")) return;
+      zone.style.stroke = "#ffffff";
+    });
 
-  zone.addEventListener("drop", (e) => {
-    e.preventDefault();
-    if (zone.getAttribute("user-ans")) return;
-    const droppedState = e.dataTransfer.getData("text/plain");
-    const originalState = zone.getAttribute("data-state");
-    //Hide dragged element from source container
-    updateDragElement(droppedState, false);
-    //Zone will map area
-    zone.style.fill = "#007bff";
-    zone.style.stroke = "#ffffff";
-    zone.setAttribute("user-ans", droppedState);
-    //Update circle drop zone style
-    const circleElement = updateMapCircle(originalState, false);
-    //Create and show text element
-    const dropText = document.createElement("div");
-    dropText.classList.add("drop-zone-text");
-    const rect = circleElement.getBoundingClientRect(); // Get the bounding rectangle
-    const xPosition = rect.left + window.scrollX; // X position relative to the document
-    const yPosition = rect.top + window.scrollY;
-    dropText.setAttribute("original-state", originalState);
-    dropText.style.top = `${yPosition}px`;
-    dropText.style.left = `${xPosition - rect.width / 2}px`;
-    dropText.innerText = droppedState;
-    document.querySelector(".map").appendChild(dropText);
+    zone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      if (zone.getAttribute("user-ans")) return;
+      const droppedState = e.dataTransfer.getData("text/plain");
+      const originalState = zone.getAttribute("data-state");
+      //Hide dragged element from source container
+      updateDragElement(droppedState, false);
+      //Zone will map area
+      zone.style.fill = "#007bff";
+      zone.style.stroke = "#ffffff";
+      zone.setAttribute("user-ans", droppedState);
+      //Update circle drop zone style
+      const circleElement = updateMapCircle(originalState, false);
+      //Create and show text element
+      const dropText = document.createElement("div");
+      dropText.classList.add("drop-zone-text");
+      const rect = circleElement.getBoundingClientRect(); // Get the bounding rectangle
+      const xPosition = rect.left + window.scrollX; // X position relative to the document
+      const yPosition = rect.top + window.scrollY;
+      dropText.setAttribute("original-state", originalState);
+      dropText.style.top = `${yPosition}px`;
+      dropText.style.left = `${xPosition - rect.width / 2}px`;
+      dropText.innerText = droppedState;
+      document.querySelector(".map").appendChild(dropText);
 
-    //Store pieces to revert
-    data.dragged.push({ place: originalState, piece: droppedState });
+      //Store pieces to revert
+      data.dragged.push({ place: originalState, piece: droppedState });
+    });
   });
-});
+}
+
+function scaleSVGToFit() {
+  const svgElement = mapContainer.children[0];
+  const svgBBox = svgElement.getBBox(); // Get bounding box of SVG content
+  const containerWidth = mapContainer.clientWidth;
+  const containerHeight = mapContainer.clientHeight;
+
+  const scaleX = containerWidth / svgBBox.width;
+  const scaleY = containerHeight / svgBBox.height;
+
+  const scale = Math.min(scaleX, scaleY); // Maintain aspect ratio
+
+  svgElement.setAttribute("transform", `scale(${scale + 0.1})`);
+}
 
 mapContainer.addEventListener("scroll", updatePositionOfAllDroppedTexts);
 
@@ -245,7 +274,11 @@ alertButton.addEventListener("click", () => {
   alertBox.style.display = "none";
 });
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  await renderMap();
+  scaleSVGToFit();
+  setupDropDrag();
+  setupDropZones();
   generateAndRenderStates();
   toggleInstructionModal();
 });
