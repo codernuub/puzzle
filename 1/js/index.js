@@ -5,6 +5,10 @@ const alertButton = document.getElementById("alertButton");
 const mapContainer = document.querySelector(".map");
 const instructionEl = document.querySelector(".instruction");
 
+const circleMap = new Map();
+const pathMap = new Map();
+const dropZoneTextMap = new Map();
+
 const data = {
   randomStates: [],
   dragged: [],
@@ -15,6 +19,9 @@ const data = {
   passed: false,
 };
 
+/**
+ * Render svg map on screen
+ */
 async function renderMap() {
   await fetch("images/map.svg")
     .then((res) => res.text())
@@ -29,6 +36,23 @@ async function renderMap() {
       alert("Error loading SVG:", error);
     });
 }
+
+/**ELEMENT MAP START*/
+function mapCircleElements() {
+  const circles = document.querySelectorAll("circle[data-state]");
+  circles.forEach((circle) => {
+    circleMap.set(circle.getAttribute("data-state"), circle);
+  });
+}
+
+function mapPathElements() {
+  const paths = document.querySelectorAll("path[data-state]");
+  paths.forEach((path) => {
+    pathMap.set(path.getAttribute("data-state"), path);
+  });
+}
+
+/**ELEMENT MAP END*/
 
 function setupInstructionModal() {
   instructionEl.children[0].children[1].innerHTML = ACTIVITY.instruction;
@@ -107,13 +131,11 @@ function showAlert(isSuccess) {
 }
 
 function undo() {
-  //window.location.reload();
   const lastDrop = data.dragged.pop();
   if (!lastDrop) return;
-  const zone = document.querySelector(`path[data-state="${lastDrop.place}"]`);
+  const zone = pathMap.get(lastDrop.place);
   //Change zone bg color
-  zone.style.stroke = "#ffffff";
-  zone.style.fill = "#c3cf6b";
+  zone.classList.remove("area-dropped");
   zone.removeAttribute("user-ans");
   //Show cirle
   updateMapCircle(lastDrop.place, true);
@@ -126,15 +148,12 @@ function undo() {
 }
 
 function tryAgain() {
-  const dropZones = document.querySelectorAll(".drop-zone");
-  dropZones.forEach((zone) => {
+  pathMap.forEach((zone, originalState) => {
     zone.classList.remove("correct");
     zone.classList.remove("incorrect");
+    zone.classList.remove("area-dropped");
     const answeredState = zone.getAttribute("user-ans");
     if (!answeredState) return;
-    const originalState = zone.getAttribute("data-state");
-    zone.style.fill = "#c3cf6b";
-    zone.style.stroke = "#ffffff";
     zone.removeAttribute("user-ans", "");
     //Remove text div
     const textDiv = document.querySelector(
@@ -156,7 +175,7 @@ function check() {
   var correct = 0;
 
   data.randomStates.forEach((stateName) => {
-    const zone = document.querySelector(`path[data-state="${stateName}"]`);
+    const zone = pathMap.get(stateName);
     if (!zone) return;
     if (zone.getAttribute("data-state") === zone.getAttribute("user-ans")) {
       correct += 1;
@@ -171,12 +190,10 @@ function check() {
 }
 
 function updatePositionOfAllDroppedTexts() {
-  const droppedTexts = document.querySelectorAll(".drop-zone-text");
-  droppedTexts.forEach((droppedText) => {
+  //const droppedTexts = document.querySelectorAll(".drop-zone-text");
+  dropZoneTextMap.forEach((droppedText, originalStateName) => {
     //Update circle drop zone style
-    const circleElement = document.querySelector(
-      `circle[data-state="${droppedText.getAttribute("original-state")}"]`
-    );
+    const circleElement = circleMap.get(originalStateName);
     const rect = circleElement.getBoundingClientRect(); // Get the bounding rectangle
     const xPosition = rect.left + window.scrollX; // X position relative to the document
     const yPosition = rect.top + window.scrollY;
@@ -187,11 +204,12 @@ function updatePositionOfAllDroppedTexts() {
 
 function updateMapCircle(stateName, show) {
   //Update circle drop zone style
-  const circleElement = document.querySelector(
-    `circle[data-state="${stateName}"]`
-  );
-  circleElement.style.fill = "none";
-  circleElement.style.stroke = show ? "grey" : "none";
+  const circleElement = circleMap.get(stateName);
+  if (!show) {
+    circleElement.classList.add("circle-dropped");
+  } else {
+    circleElement.classList.remove("circle-dropped");
+  }
   return circleElement;
 }
 
@@ -205,8 +223,7 @@ function updateDragElement(draggedState, show) {
 }
 
 function setupDropZones() {
-  const dropZones = document.querySelectorAll(".drop-zone");
-  dropZones.forEach((zone) => {
+  pathMap.forEach((zone, originalState) => {
     zone.addEventListener("dragover", (e) => {
       e.preventDefault();
       if (zone.getAttribute("user-ans")) return;
@@ -222,13 +239,6 @@ function setupDropZones() {
       e.preventDefault();
       if (zone.getAttribute("user-ans")) return;
       const droppedState = e.dataTransfer.getData("text/plain");
-      const originalState = zone.getAttribute("data-state");
-      //Hide dragged element from source container
-      updateDragElement(droppedState, false);
-      //Zone will map area
-      zone.style.fill = "#007bff";
-      zone.style.stroke = "#ffffff";
-      zone.setAttribute("user-ans", droppedState);
       //Update circle drop zone style
       const circleElement = updateMapCircle(originalState, false);
       //Create and show text element
@@ -241,8 +251,14 @@ function setupDropZones() {
       dropText.style.top = `${yPosition}px`;
       dropText.style.left = `${xPosition - rect.width / 2}px`;
       dropText.innerText = droppedState;
-      document.querySelector(".map").appendChild(dropText);
+      mapContainer.appendChild(dropText);
+      dropZoneTextMap.set(originalState, dropText);
 
+      //Hide dragged element from source container
+      updateDragElement(droppedState, false);
+      //Zone will map area
+      zone.classList.add("area-dropped");
+      zone.setAttribute("user-ans", droppedState);
       //Store pieces to revert
       data.dragged.push({ place: originalState, piece: droppedState });
     });
@@ -277,8 +293,13 @@ alertButton.addEventListener("click", () => {
 document.addEventListener("DOMContentLoaded", async () => {
   await renderMap();
   scaleSVGToFit();
+
+  mapCircleElements();
+  mapPathElements();
+
   setupDropDrag();
   setupDropZones();
+
   generateAndRenderStates();
   toggleInstructionModal();
 });

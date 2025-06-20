@@ -41,12 +41,13 @@ body {
 }
 .screen > .map {
   display: flex;
-  flex:1;
+  flex: 1;
   margin: auto;
   overflow: hidden;
 }
 .screen > .map > svg {
   margin: auto;
+  will-change: transform;
 }
 
 .screen > .map > svg path {
@@ -64,6 +65,15 @@ body {
   stroke-width: 2;
   fill: none;
   stroke: grey;
+}
+
+.circle-dropped {
+  stroke: none !important;
+}
+
+.area-dropped {
+  fill: #007bff !important;
+  stroke: #ffffff !important;
 }
 
 .map::-webkit-scrollbar {
@@ -107,6 +117,7 @@ body {
   z-index: 100;
   pointer-events: none;
   letter-spacing: 0.2;
+    will-change: transform;
 }
 
 /*Bar styles*/
@@ -141,7 +152,7 @@ body {
 .states > .state {
   width: calc(100% - 40px);
   flex-shrink: none;
-  white-space:nowrap;
+  white-space: nowrap;
   padding: 10px;
   margin: 10px;
   border-radius: 2px;
@@ -330,9 +341,9 @@ body {
   background-color: #0056b3;
 }
 
-@media only screen and (min-width: 800px){
+@media only screen and (min-width: 800px) {
   .layout {
-    flex-direction:row
+    flex-direction: row;
   }
 
   .screen > .map {
@@ -342,7 +353,7 @@ body {
   }
   .screen > .map > svg {
     width: fit-content;
-    height: 100%
+    height: 100%;
   }
 
   .toolbar {
@@ -364,7 +375,7 @@ body {
     text-align: center;
     font-size: 1rem;
     border: 1px solid grey;
-    padding:10px 5px !important; 
+    padding: 10px 5px !important;
     margin: 0;
     width: calc(100% - 12px);
   }
@@ -372,5 +383,4 @@ body {
   .buttons {
     flex-direction: column;
   }
-  
 }

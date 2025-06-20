@@ -11,9 +11,6 @@ function setupDropDrag() {
   function startDrag(e) {
     e.preventDefault();
 
-    // Get current scale from data attribute
-    let scale = parseFloat(svgElement.getAttribute("data-scale")) || 1;
-
     // Check if the SVG is overflowing
     const mapRect = mapContainer.getBoundingClientRect();
     const svgRect = svgElement.getBoundingClientRect();
