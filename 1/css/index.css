@@ -41,7 +41,6 @@ body {
 }
 .screen > .map {
   display: flex;
-  flex: 1;
   margin: auto;
   overflow: hidden;
 }
@@ -71,6 +70,10 @@ body {
   stroke: none !important;
 }
 
+.area-hover {
+  stroke: #007bff !important;
+}
+
 .area-dropped {
   fill: #007bff !important;
   stroke: #ffffff !important;
@@ -81,20 +84,34 @@ body {
 }
 .zooms {
   display: flex;
-  gap: 5px;
-  position: fixed;
+  gap: 8px;
+  position: absolute;
   top: 20px;
   left: 20px;
-  z-index: 50;
+  z-index: 100;
 }
-.zooms > button {
+.zooms >button{
   display: flex;
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   outline: none;
-  background-color: #dfdfdf;
-  border: 1px solid grey;
+  font-size: 1.5rem;
+  background-color: royalblue;
   border-radius: 5px;
+  font-weight: bold;
+  font-family: sans-serif;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, 0.2), 0 8px 10px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+.zooms >button:disabled {
+  cursor:not-allowed;
+  opacity: 0.5;
 }
 .zooms > span {
   margin: auto 0;
@@ -117,7 +134,7 @@ body {
   z-index: 100;
   pointer-events: none;
   letter-spacing: 0.2;
-    will-change: transform;
+  will-change: transform;
 }
 
 /*Bar styles*/
@@ -165,6 +182,7 @@ body {
   border-right: none;
   text-align: center;
   font-size: 1rem;
+  font-family: sans-serif;
   font-weight: bold;
   color: black;
 }

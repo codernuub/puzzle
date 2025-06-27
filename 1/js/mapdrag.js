@@ -9,6 +9,13 @@ function setupDropDrag() {
   mapContainer.addEventListener("touchstart", startDrag, { passive: false });
 
   function startDrag(e) {
+    const target = e.target;
+
+    // Ignore drag if touching a button or interactive element
+    if (target.closest("button, a, input, textarea, select")) {
+      return; // Don't interfere
+    }
+
     e.preventDefault();
 
     // Check if the SVG is overflowing

@@ -2,8 +2,12 @@ const states = document.querySelectorAll(".state");
 const alertBox = document.getElementById("alertBox");
 const alertMessage = document.getElementById("alertMessage");
 const alertButton = document.getElementById("alertButton");
+const screenContainer = document.querySelector(".screen");
 const mapContainer = document.querySelector(".map");
 const instructionEl = document.querySelector(".instruction");
+
+var percentageElement = null; //display zoom percentage
+var zoomButtons = null;
 
 const circleMap = new Map();
 const pathMap = new Map();
@@ -27,10 +31,14 @@ async function renderMap() {
     .then((res) => res.text())
     .then((res) => {
       mapContainer.innerHTML = `${res} <div class="zooms">
-            <button onclick="zoomOut()"><span>-</span></button>
-            <span>0%</span>
-            <button onclick="zoomIn()"><span>+</span></button>
+            <button id="zoom-out" onclick="zoomOut()"><span>-</span></button>
+            <!--<span>0%</span>-->
+            <button id="zoom-in" onclick="zoomIn()"><span>+</span></button>
           </div>`;
+
+      zoomButtons = mapContainer.children[1];
+      zoomButtons.children[0].disabled = true;
+      percentageElement = zoomButtons.children[1];
     })
     .catch((error) => {
       alert("Error loading SVG:", error);
@@ -70,28 +78,70 @@ function toggleInstructionModal() {
   }
 }
 
-function updateZoomPercentage() {
-  mapContainer.children[1].children[1].textContent = `${Math.round(
-    (data.scale - 1 / data.minScale) * 100
-  )}%`;
+function updatePositionOfAllDroppedTexts() {
+  //const droppedTexts = document.querySelectorAll(".drop-zone-text");
+  dropZoneTextMap.forEach((droppedText, originalStateName) => {
+    //Update circle drop zone style
+    const circleElement = circleMap.get(originalStateName);
+    const rect = circleElement.getBoundingClientRect(); // Get the bounding rectangle
+    const xPosition = rect.left + window.scrollX; // X position relative to the document
+    const yPosition = rect.top + window.scrollY;
+    droppedText.style.top = `${yPosition}px`;
+    droppedText.style.left = `${xPosition - rect.width / 2}px`;
+  });
 }
+
+var percentTimer = null;
+function updateZoomPercentage() {
+  clearInterval(percentTimer);
+  percentTimer = setTimeout(() => {
+    const percentage =
+      ((data.scale - data.minScale) / (data.maxScale - data.minScale)) * 100;
+    percentageElement.textContent = `${Math.round(percentage)}%`;
+  }, 120);
+}
+
+function updateZoomButtons() {
+  const [zoomOutBtn, zoomInBtn] = [...zoomButtons.children];
+
+  // Disable zoom out if at or below min scale
+  if (data.scale <= data.minScale) {
+    zoomOutBtn.disabled = true;
+  } else {
+    zoomOutBtn.disabled = false;
+  }
+
+  // Disable zoom in if at or above max scale
+  if (data.scale >= data.maxScale) {
+    zoomInBtn.disabled = true;
+  } else {
+    zoomInBtn.disabled = false;
+  }
+}
+
 function zoomIn() {
   const svgElement = mapContainer.children[0];
   if (data.scale < data.maxScale) {
     data.scale += data.scaleStep;
     svgElement.style.transform = `scale(${data.scale})`;
     updatePositionOfAllDroppedTexts();
-    updateZoomPercentage();
+    //updateZoomPercentage();
+    updateZoomButtons();
+    if (data.scale >= data.maxScale) {
+      zoomButtons.children[1].disabled = true;
+    }
   }
 }
 
 function zoomOut() {
+  console.log("Clicked zoomOut");
   const svgElement = mapContainer.children[0];
   if (data.scale > data.minScale) {
     data.scale -= data.scaleStep;
     svgElement.style.transform = `scale(${data.scale})`;
     updatePositionOfAllDroppedTexts();
-    updateZoomPercentage();
+    //updateZoomPercentage();
+    updateZoomButtons();
   }
 }
 
@@ -107,7 +157,7 @@ function generateAndRenderStates() {
   statesContainer.innerHTML = "";
   data.randomStates = ACTIVITY.states.length
     ? ACTIVITY.states
-    : getRandomStates(statesData, ACTIVITY.randomStatesCount);
+    : getRandomStates(DATA_LIST, ACTIVITY.randomStatesCount);
   data.randomStates.forEach((stateName) => {
     const div = document.createElement("div");
     div.className = "state";
@@ -136,6 +186,7 @@ function undo() {
   const zone = pathMap.get(lastDrop.place);
   //Change zone bg color
   zone.classList.remove("area-dropped");
+  zone.classList.remove("area-hover");
   zone.removeAttribute("user-ans");
   //Show cirle
   updateMapCircle(lastDrop.place, true);
@@ -152,6 +203,7 @@ function tryAgain() {
     zone.classList.remove("correct");
     zone.classList.remove("incorrect");
     zone.classList.remove("area-dropped");
+    zone.classList.remove("area-hover");
     const answeredState = zone.getAttribute("user-ans");
     if (!answeredState) return;
     zone.removeAttribute("user-ans", "");
@@ -189,19 +241,6 @@ function check() {
   showAlert(data.passed);
 }
 
-function updatePositionOfAllDroppedTexts() {
-  //const droppedTexts = document.querySelectorAll(".drop-zone-text");
-  dropZoneTextMap.forEach((droppedText, originalStateName) => {
-    //Update circle drop zone style
-    const circleElement = circleMap.get(originalStateName);
-    const rect = circleElement.getBoundingClientRect(); // Get the bounding rectangle
-    const xPosition = rect.left + window.scrollX; // X position relative to the document
-    const yPosition = rect.top + window.scrollY;
-    droppedText.style.top = `${yPosition}px`;
-    droppedText.style.left = `${xPosition - rect.width / 2}px`;
-  });
-}
-
 function updateMapCircle(stateName, show) {
   //Update circle drop zone style
   const circleElement = circleMap.get(stateName);
@@ -219,7 +258,7 @@ function updateDragElement(draggedState, show) {
     `.state[data-state="${draggedState}"]`
   );
   stateElement.setAttribute("draggable", show ? "true" : "false");
-  stateElement.style.opacity = show ? "1" : "0";
+  stateElement.style.display = show ? "block" : "none";
 }
 
 function setupDropZones() {
@@ -227,12 +266,12 @@ function setupDropZones() {
     zone.addEventListener("dragover", (e) => {
       e.preventDefault();
       if (zone.getAttribute("user-ans")) return;
-      zone.style.stroke = "#007bff";
+      zone.classList.add("area-hover");
     });
 
     zone.addEventListener("dragleave", () => {
       if (zone.getAttribute("user-ans")) return;
-      zone.style.stroke = "#ffffff";
+      zone.classList.remove("area-hover");
     });
 
     zone.addEventListener("drop", (e) => {
@@ -271,12 +310,17 @@ function scaleSVGToFit() {
   const containerWidth = mapContainer.clientWidth;
   const containerHeight = mapContainer.clientHeight;
 
+  console.log(svgBBox);
+  console.log(containerWidth, containerHeight);
+
   const scaleX = containerWidth / svgBBox.width;
   const scaleY = containerHeight / svgBBox.height;
 
+  console.log(scaleX, scaleY);
+
   const scale = Math.min(scaleX, scaleY); // Maintain aspect ratio
 
-  svgElement.setAttribute("transform", `scale(${scale + 0.1})`);
+  //svgElement.setAttribute("transform", `scale(${scale + 0.1})`);
 }
 
 mapContainer.addEventListener("scroll", updatePositionOfAllDroppedTexts);
