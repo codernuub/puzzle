@@ -1,17 +1,11 @@
-const stateNames = Object.keys(STATES_INFO);
-const svgContainer = document.querySelector("#svg-container");
+const container = document.querySelector("#container");
 const instructionEl = document.querySelector(".instruction");
 
-const lastDragged = [];
-
-const savedState = JSON.parse(
-  window.localStorage.getItem("map:coords") || "{}"
-);
+const svgMap = new SVGMap();
+const mapPieces = new MapPieces({ containerRect: container.getBoundingClientRect()});
 
 function showAlert(isSuccess) {
-  const audioSrc = isSuccess
-    ? "audio/welldone.mp3"
-    : "audio/tryAgain.mp3";
+  const audioSrc = isSuccess ? "audio/welldone.mp3" : "audio/tryAgain.mp3";
   var audio = new Audio(audioSrc);
   alertMessage.textContent = isSuccess ? "Well Done!" : "Try Again!";
   alertMessage.style.color = isSuccess ? "green" : "#F44336"; // Green for success, red for try again
@@ -35,61 +29,8 @@ function toggleInstructionModal() {
   }
 }
 
-async function renderMapOutline() {
-  await fetch("images/map/outline-map.svg")
-    .then((response) => response.text())
-    .then((svgText) => {
-      svgContainer.children[0].innerHTML = svgText;
-    })
-    .catch((error) => {
-      console.error("Error loading SVG:", error);
-    });
-}
-
-function renderSavedPieces() {
-  Object.keys(savedState).forEach((stateName) => {
-    lastDragged.push(stateName);
-    renderPiece(stateName, STATES_INFO[stateName], savedState[stateName]);
-  });
-}
-
-function renderPiece(stateName, { width, height, order }, { x, y }) {
-  const state = document.querySelector(`.state#${stateName}`);
-  const stateImg = state?.children[0];
-  if (stateImg) {
-    const outerEl = document.createElement("div");
-    outerEl.classList.add("drag-state");
-    outerEl.setAttribute("id", stateName);
-    //Create Image Element
-    const img = document.createElement("img");
-    img.width = width;
-    img.height = height;
-    img.style.zIndex = order;
-    img.src = stateImg.getAttribute("src");
-    outerEl.appendChild(img);
-    //Create Text Element
-    if (ACTIVITY.showStateName) {
-      const p = document.createElement("p");
-      p.textContent = stateName.split("-").join(" ");
-      p.style.transform = `translate(${width / 2 - p.clientWidth}px, -${
-        height - p.clientHeight
-      }px)`;
-      outerEl.appendChild(p);
-    }
-    makeDraggable(outerEl);
-    svgContainer.appendChild(outerEl);
-    outerEl.style.opacity = 0;
-    outerEl.setAttribute("style", `transform: translate(${x}px,${y}px)`);
-    outerEl.style.opacity = 1;
-    //Hide piece from list
-    state.classList.add("selected");
-    //Store last dragged
-    lastDragged.push(stateName);
-  }
-}
-
 function renderStateList() {
-  const states = stateNames.map((stateName) => {
+  const states = SUPPORTED_STATES.map((stateName) => {
     return `<div class='state' id="${stateName}">
          <img src="images/map/states/${stateName}.png" draggable="true" id="${stateName}"  alt="${stateName}"/>
     </div>`;
@@ -114,10 +55,10 @@ function showStatusIcon(isCorrect, position) {
   img.style.transform = `translate(${position.x + position.width / 2 - 20}px,${
     position.y + position.height / 2 - 20
   }px)`;
-  svgContainer.appendChild(img);
+  container.appendChild(img);
 }
 
-function isMostlyOverlapping(rect1, rect2, id) {
+function isMostlyOverlapping(rect1, rect2) {
   // Find the coordinates of the intersection rectangle
   const xOverlap = Math.max(
     0,
@@ -138,33 +79,34 @@ function isMostlyOverlapping(rect1, rect2, id) {
   const minArea = Math.min(area1, area2);
   const overlapPercent = (intersectionArea / minArea) * 100;
 
-  return overlapPercent >= 94 && overlapPercent <= 100;
+  return overlapPercent >= 90 && overlapPercent <= 100;
 }
 
 //BUTTON ACTIONS
 function check() {
-  const droppedImages = svgContainer.querySelectorAll(`div.drag-state`);
+  const droppedImages = container.querySelectorAll(`div.drag-state`);
   const success = [...droppedImages].map((state) => {
     const id = state.getAttribute("id");
     var isCorrect = false;
     if (!id) return isCorrect;
     const draggedPieceRect = state.getBoundingClientRect();
     if (ACTIVITY.states.includes(id)) {
-      const piece = svgContainer.querySelector(`path[id="${id}"]`);
+      const piece = container.querySelector(`path[id="${id}"]`);
       if (!piece) return false;
       const piecePathRect = piece.getBoundingClientRect();
-      isCorrect = isMostlyOverlapping(draggedPieceRect, piecePathRect, id);
+      isCorrect = isMostlyOverlapping(draggedPieceRect, piecePathRect);
     }
     showStatusIcon(isCorrect, draggedPieceRect);
     return isCorrect;
   });
   const allPlaced = success.length === ACTIVITY.states.length;
+  console.log(allPlaced);
   const status = success.some((success) => !success);
   showAlert(!status && allPlaced);
 }
 
 function saveMap() {
-  const coords = [...svgContainer.children].reduce((acc, element, index) => {
+  const coords = [...container.children].reduce((acc, element, index) => {
     if (index === 0) return {};
     const coord = getCurrentCoordinates(element);
     acc[element.id] = coord; // Use element's id as the key
@@ -180,10 +122,10 @@ function restart() {
 }
 
 function undo() {
-  const stateName = lastDragged.pop();
+  const stateName = mapPieces.lastDragged.pop();
   if (!stateName) return;
   document.querySelector(`div#${stateName}`).classList.remove("selected");
-  svgContainer.querySelector(`div#${stateName}`).remove();
+  container.querySelector(`div#${stateName}`).remove();
 }
 
 //ATTACH EVENT LISTENERS
@@ -192,23 +134,19 @@ alertButton.addEventListener("click", () => {
   restart();
 });
 
-svgContainer.addEventListener("dragover", (e) => {
+container.addEventListener("dragover", (e) => {
   e.preventDefault();
 });
 
-svgContainer.addEventListener("drop", (e) => {
+container.addEventListener("drop", (e) => {
   e.preventDefault();
   const stateId = e.dataTransfer.getData("text/plain");
-  const { width, height } = STATES_INFO[stateId];
-  const rect = svgContainer.getBoundingClientRect();
-  const offsetX = e.clientX - rect.left - width / 2;
-  const offsetY = e.clientY - rect.top - height / 2;
-  renderPiece(stateId, { width, height }, { x: offsetX, y: offsetY });
+  mapPieces.renderPiece({stateName:stateId, scale:svgMap.resizedSVGRect.scale, mouseDrop:e});
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
-  await renderMapOutline();
+  await svgMap.render(container);
   renderStateList();
-  renderSavedPieces();
+  mapPieces.renderSavedPieces(svgMap.resizedSVGRect.scale);
   setupInstructionModal();
 });

@@ -27,49 +27,40 @@ html {
 }
 
 /*SVG STYLES*/
-#svg-container {
+#container {
   display: flex;
-  position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
 }
-#svg-container > .drag-state {
+#container > .drag-state {
+  width: fit-content;
+  height: fit-content;
   position: absolute;
   cursor: pointer;
 }
-#svg-container > .drag-state > img {
+#container > .drag-state > img {
   position: relative;
   aspect-ratio: auto;
   object-fit: contain;
+  will-change: transform;
 }
-#svg-container > .drag-state > p {
+#container > .drag-state > p {
   position: absolute;
   z-index: 10000;
   text-transform: capitalize;
 }
-#svg-container > .drag-state:hover {
+#container > .drag-state:hover {
   opacity: 0.6;
 }
-
-#svg-container > .map-outline {
-  position: relative;
-  /*width: 632px;*/
-  width: 656px;
+.svg-container {
   margin: auto;
-  z-index: -1;
 }
-
-.svg {
-  display: flex;
-  width: 100%;
-  height: 100%;
-}
-svg {
-  flex-shrink: 0;
+.svg { 
   margin: auto;
   transform-origin: top left;
-  transform: scale(0.13) translate(50%, 2.5%);
+  flex-shrink: 0;
+  will-change: transform;
 }
 
 .checked {
@@ -318,16 +309,16 @@ svg {
     flex-direction: column;
     height: 100%;
   }
-  .layout > #svg-container {
+  .layout > #container {
     flex: 1;
   }
-  .layout > #svg-container > img {
-    scale: 0.68;
-    transform-origin: left;
+  .layout > #container > img {
+    /*scale: 0.68;*/
+    transform-origin:top left;
   }
-  svg {
+  /*svg {
     transform: translate(0) scale(0.09);
-  }
+  }*/
   .toolbar {
     width: 100%;
     height: fit-content;
@@ -336,7 +327,7 @@ svg {
   .buttons {
     width: 100%;
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 0;
     padding: 0;
   }
